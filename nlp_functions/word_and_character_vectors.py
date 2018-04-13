@@ -26,6 +26,9 @@ FASTTEXT_DIMENSION=300
 CHAR_FILENAME='char_dim_wordSize_word_size.txt'
 #CHAR_DIMENSION=128
 #CHAR_WORD_SAMPLING=5
+GLOVE_TWITTER_VOCAB_SIZE=1193514
+GLOVE_TWITTER_FILENAME='glove.twitter.27B.200d.txt'
+GLOVE_TWITTER_DIMENSION=200
 
 def get_char(data_file_path,CHAR_DIMENSION=128,CHAR_WORD_SAMPLING=5,CHAR_VOCAB_SIZE=65):
     filename=CHAR_FILENAME
@@ -80,6 +83,11 @@ def get_character_embeddings(datafile,vocab_size,dimension):
     assert idx == final_vocab_size
 
     return emb_matrix, char2id, id2char
+
+#get twitter vectors.
+def get_glove_twitter(data_file_path):
+    path=os.path.join(data_file_path,GLOVE_TWITTER_FILENAME)
+    return get_word_embeddings(path,GLOVE_TWITTER_VOCAB_SIZE,GLOVE_TWITTER_DIMENSION)
 
 
 #get glove vectors. need to pass just the data path location
@@ -146,3 +154,4 @@ def get_word_embeddings(datafile,vocab_size,dimension):
     assert idx == final_vocab_size
 
     return emb_matrix, word2id, id2word
+
