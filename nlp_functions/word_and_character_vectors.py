@@ -29,6 +29,10 @@ CHAR_FILENAME='char_dim_wordSize_word_size.txt'
 GLOVE_TWITTER_VOCAB_SIZE=1193514
 GLOVE_TWITTER_FILENAME='glove.twitter.27B.200d.txt'
 GLOVE_TWITTER_DIMENSION=200
+WORD2VEC_VOCAB_SIZE=3000000
+WORD2VEC_DIMENSION=300
+WORD2VEC_FILENAME='GoogleNews-vectors-negative300.txt'
+
 
 def get_char(data_file_path,CHAR_DIMENSION=128,CHAR_WORD_SAMPLING=5,CHAR_VOCAB_SIZE=65):
     filename=CHAR_FILENAME
@@ -89,6 +93,10 @@ def get_glove_twitter(data_file_path):
     path=os.path.join(data_file_path,GLOVE_TWITTER_FILENAME)
     return get_word_embeddings(path,GLOVE_TWITTER_VOCAB_SIZE,GLOVE_TWITTER_DIMENSION)
 
+#get google news vectors
+def get_word2vec(data_file_path):
+    path=os.path.join(data_file_path,WORD2VEC_FILENAME)
+    return get_word_embeddings(path,WORD2VEC_VOCAB_SIZE,WORD2VEC_DIMENSION)
 
 #get glove vectors. need to pass just the data path location
 #adds glove.42B.300d to path
