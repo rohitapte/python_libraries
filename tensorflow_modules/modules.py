@@ -2,6 +2,30 @@ from tensorflow_modules.model import NeuralLayer
 import tensorflow as tf
 from tensorflow import variable_scope as vs
 
+def masked_softmax(logits, mask, dim):
+    """
+    Takes masked softmax over given dimension of logits.
+
+    Inputs:
+      logits: Numpy array. We want to take softmax over dimension dim.
+      mask: Numpy array of same shape as logits.
+        Has 1s where there's real data in logits, 0 where there's padding
+      dim: int. dimension over which to take softmax
+
+    Returns:
+      masked_logits: Numpy array same shape as logits.
+        This is the same as logits, but with 1e30 subtracted
+        (i.e. very large negative number) in the padding locations.
+      prob_dist: Numpy array same shape as logits.
+        The result of taking softmax over masked_logits in given dimension.
+        Should be 0 in padding locations.
+        Should sum to 1 over given dimension.
+    """
+    exp_mask = (1 - tf.cast(mask, 'float')) * (-1e30) # -large where there's padding, 0 elsewhere
+    masked_logits = tf.add(logits, exp_mask) # where there's padding, set logits to -large
+    prob_dist = tf.nn.softmax(masked_logits, dim)
+    return masked_logits, prob_dist
+
 class NeuralNetworkHiddenLayer(NeuralLayer):
     def __init__(self,name,input_size,hidden_size,keep_prop):
         self.name=name
@@ -98,3 +122,76 @@ class BiRNNLayer(NeuralLayer):
             out=tf.concat([fw_out,bw_out],2)
             out=tf.nn.dropout(out,self.keep_prob)
             return out
+
+class SimpleSoftmax(object):
+    def __init__(self):
+        pass
+
+    def build_graph(self,inputs,mask):
+        with vs.variable_scope("SimpleSoftmaxLayer"):
+            logits = tf.contrib.layers.fully_connected(inputs, num_outputs=1, activation_fn=None) # shape (batch_size, seq_len, 1)
+            logits = tf.squeeze(logits, axis=[2]) # shape (batch_size, seq_len)
+
+            # Take softmax over sequence
+            masked_logits, prob_dist = masked_softmax(logits, masks, 1)
+            return masked_logits, prob_dist
+
+class BasicAttn(object):
+    """Module for basic attention.
+
+    Note: in this module we use the terminology of "keys" and "values" (see lectures).
+    In the terminology of "X attends to Y", "keys attend to values".
+
+    In the baseline model, the keys are the context hidden states
+    and the values are the question hidden states.
+
+    We choose to use general terminology of keys and values in this module
+    (rather than context and question) to avoid confusion if you reuse this
+    module with other inputs.
+    """
+
+    def __init__(self, keep_prob, key_vec_size, value_vec_size):
+        """
+        Inputs:
+          keep_prob: tensor containing a single scalar that is the keep probability (for dropout)
+          key_vec_size: size of the key vectors. int
+          value_vec_size: size of the value vectors. int
+        """
+        self.keep_prob = keep_prob
+        self.key_vec_size = key_vec_size
+        self.value_vec_size = value_vec_size
+
+    def build_graph(self, values, values_mask, keys):
+        """
+        Keys attend to values.
+        For each key, return an attention distribution and an attention output vector.
+
+        Inputs:
+          values: Tensor shape (batch_size, num_values, value_vec_size).
+          values_mask: Tensor shape (batch_size, num_values).
+            1s where there's real input, 0s where there's padding
+          keys: Tensor shape (batch_size, num_keys, value_vec_size)
+
+        Outputs:
+          attn_dist: Tensor shape (batch_size, num_keys, num_values).
+            For each key, the distribution should sum to 1,
+            and should be 0 in the value locations that correspond to padding.
+          output: Tensor shape (batch_size, num_keys, hidden_size).
+            This is the attention output; the weighted sum of the values
+            (using the attention distribution as weights).
+        """
+        with vs.variable_scope("BasicAttn"):
+
+            # Calculate attention distribution
+            values_t = tf.transpose(values, perm=[0, 2, 1]) # (batch_size, value_vec_size, num_values)
+            attn_logits = tf.matmul(keys, values_t) # shape (batch_size, num_keys, num_values)
+            attn_logits_mask = tf.expand_dims(values_mask, 1) # shape (batch_size, 1, num_values)
+            _, attn_dist = masked_softmax(attn_logits, attn_logits_mask, 2) # shape (batch_size, num_keys, num_values). take softmax over values
+
+            # Use attention distribution to take weighted sum of values
+            output = tf.matmul(attn_dist, values) # shape (batch_size, num_keys, value_vec_size)
+
+            # Apply dropout
+            output = tf.nn.dropout(output, self.keep_prob)
+
+            return attn_dist, output
