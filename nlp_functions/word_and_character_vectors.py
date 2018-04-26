@@ -14,10 +14,10 @@ UNK_ID = 1
 #these are the lines in the glove and fasttext files
 #GLOVE_VOCAB_SIZE=5000
 #GLOVE_FILENAME='glove_small.txt'
-GLOVE_VOCAB_SIZE=1917494
-GLOVE_FILENAME='glove.42B.300d.txt'
-#GLOVE_VOCAB_SIZE=400000
-#GLOVE_FILENAME='glove.6B.300d.txt'
+#GLOVE_VOCAB_SIZE=1917494
+#GLOVE_FILENAME='glove.42B.300d.txt'
+GLOVE_VOCAB_SIZE=400000
+GLOVE_FILENAME='glove.6B.300d.txt'
 GLOVE_DIMENSION=300
 FASTTEXT_VOCAB_SIZE=2000000
 FASTTEXT_FILENAME='crawl-300d-2M.vec'
@@ -133,7 +133,7 @@ def get_word_embeddings(datafile,vocab_size,dimension):
     word2id = {}
     id2word = {}
 
-    random_init = False
+    random_init = True
     # randomly initialize the special tokens
     if random_init:
         emb_matrix[:len(_START_VOCAB), :] = np.random.randn(len(_START_VOCAB), dim)
