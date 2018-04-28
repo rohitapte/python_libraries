@@ -21,7 +21,7 @@ def sentence_to_word_ids(sentence,word2id):
     for w in tokens:
         word_ids.append(word2id.get(w,UNK_ID))
 
-    return word_ids
+    return tokens,word_ids
 
 def sentence_to_char_ids(sentence,char2id):
     """
@@ -36,7 +36,7 @@ def sentence_to_char_ids(sentence,char2id):
             char_word_ids.append(char2id.get(c,UNK_ID))
         char_ids.append(char_word_ids)
 
-    return char_ids
+    return tokens,char_ids
 
 def tokens_to_word_ids(tokens,word2id):
     """
@@ -81,11 +81,20 @@ def sentence_to_word_and_char_token_ids(sentence,word2id,char2id):
 
     return tokens,word_ids,char_ids
 
-def pad_words(word_array,pad_size):
-    if len(word_array)<pad_size:
-        word_array=word_array+[PAD_ID]*(pad_size-len(word_array))
-    return word_array
+def pad_words(word_array,pad_size=0):
+    if pad_size==0:
+        maxlen=max([len(token) for token in word_array])
+    else:
+        maxlen=pad_size
+    retval=[]
+    for token in word_array:
+        newtoken=token+[PAD_ID]*(maxlen-len(token))
+        retval.append(newtoken)
+    return retval
 
+#---------------
+#need to fix this!!!
+#--------------
 def pad_characters(char_array,pad_size,word_pad_size):
     if len(char_array)<pad_size:
         char_array=char_array+[[PAD_ID]]*(pad_size-len(char_array))
