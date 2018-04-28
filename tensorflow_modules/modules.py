@@ -1,6 +1,9 @@
 from tensorflow_modules.model import NeuralLayer
 import tensorflow as tf
-from tensorflow import variable_scope as vs
+#from tensorflow import variable_scope as vs
+from tensorflow.python.ops.rnn_cell import DropoutWrapper
+from tensorflow.python.ops import variable_scope as vs
+from tensorflow.python.ops import rnn_cell
 
 def masked_softmax(logits, mask, dim):
     """
@@ -123,11 +126,11 @@ class BiRNNLayer(NeuralLayer):
             out=tf.nn.dropout(out,self.keep_prob)
             return out
 
-class SimpleSoftmax(object):
+class SimpleSoftmax(NeuralLayer):
     def __init__(self):
         pass
 
-    def build_graph(self,inputs,mask):
+    def build_graph(self,inputs,masks):
         with vs.variable_scope("SimpleSoftmaxLayer"):
             logits = tf.contrib.layers.fully_connected(inputs, num_outputs=1, activation_fn=None) # shape (batch_size, seq_len, 1)
             logits = tf.squeeze(logits, axis=[2]) # shape (batch_size, seq_len)
@@ -136,7 +139,7 @@ class SimpleSoftmax(object):
             masked_logits, prob_dist = masked_softmax(logits, masks, 1)
             return masked_logits, prob_dist
 
-class BasicAttn(object):
+class BasicAttn(NeuralLayer):
     """Module for basic attention.
 
     Note: in this module we use the terminology of "keys" and "values" (see lectures).
@@ -196,7 +199,7 @@ class BasicAttn(object):
 
             return attn_dist, output
 
-class RNNEncoder(object):
+class RNNEncoder(NeuralLayer):
     """
     General-purpose module to encode a sequence using a RNN.
     It feeds the input through a RNN and returns all the hidden states.
@@ -220,10 +223,10 @@ class RNNEncoder(object):
         """
         self.hidden_size = hidden_size
         self.keep_prob = keep_prob
-        self.rnn_cell_fw = rnn_cell.GRUCell(self.hidden_size)
-        self.rnn_cell_fw = DropoutWrapper(self.rnn_cell_fw, input_keep_prob=self.keep_prob)
-        self.rnn_cell_bw = rnn_cell.GRUCell(self.hidden_size)
-        self.rnn_cell_bw = DropoutWrapper(self.rnn_cell_bw, input_keep_prob=self.keep_prob)
+        self.rnn_cell_fw = tf.contrib.rnn.GRUCell(self.hidden_size)
+        self.rnn_cell_fw = tf.contrib.rnn.DropoutWrapper(self.rnn_cell_fw, input_keep_prob=self.keep_prob)
+        self.rnn_cell_bw = tf.contrib.rnn.GRUCell(self.hidden_size)
+        self.rnn_cell_bw = tf.contrib.rnn.DropoutWrapper(self.rnn_cell_bw, input_keep_prob=self.keep_prob)
 
     def build_graph(self, inputs, masks):
         """

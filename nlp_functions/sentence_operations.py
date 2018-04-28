@@ -1,14 +1,18 @@
 from nlp_functions.word_and_character_vectors import PAD_ID,UNK_ID
+import re
 
-def split_by_whitespace(sentence):
+def split_by_whitespace(sentence,splitEndOfSentence=False):
     words=[]
-    for word in sentence.strip().split():
-        if word[-1] in '.,?!;':
-            words.append(word[:-1])
-            words.append(word[-1])
-        else:
-            words.append(word)
-        #words.extend(re.split(" ",word_fragment))
+    if splitEndOfSentence:
+        for word in sentence.strip().split():
+            if word[-1] in '.,?!;':
+                words.append(word[:-1])
+                words.append(word[-1])
+            else:
+                words.append(word)
+    else:
+        for word in sentence.strip().split():
+            words.extend(re.split(" ",word))
     return [w for w in words if w]
 
 def sentence_to_word_ids(sentence,word2id):
