@@ -1,7 +1,7 @@
 from nlp_functions.word_and_character_vectors import PAD_ID,UNK_ID
 import re
 
-def split_by_whitespace(sentence,splitEndOfSentence=False):
+def split_by_whitespace(sentence,splitEndOfSentence=True):
     words=[]
     if splitEndOfSentence:
         for word in sentence.strip().split():
