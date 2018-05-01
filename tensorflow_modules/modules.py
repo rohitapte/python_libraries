@@ -116,7 +116,7 @@ class BiRNNLayer(NeuralLayer):
         if typeOfRNN=='GRU':
             self.rnn_cell_fw = tf.contrib.rnn.GRUCell(self.hidden_size)
             self.rnn_cell_bw = tf.contrib.rnn.GRUCell(self.hidden_size)
-        else
+        else:
             self.rnn_cell_fw=tf.contrib.rnn.LSTMCell(self.hidden_size)
             self.rnn_cell_bw=tf.contrib.rnn.LSTMCell(self.hidden_size)
         self.rnn_cell_fw=tf.contrib.rnn.DropoutWrapper(self.rnn_cell_fw,input_keep_prob=self.keep_prob)
