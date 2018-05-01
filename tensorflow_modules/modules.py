@@ -109,14 +109,19 @@ class LSTMLayer(NeuralLayer):
         return final_value          #batch,hidden_size
 
 class BiRNNLayer(NeuralLayer):
-    def __init__(self,name,hidden_size,keep_prob):
+    def __init__(self,name,hidden_size,keep_prob,typeOfRNN='LSTM'):
         self.name=name
         self.hidden_size=hidden_size
         self.keep_prob=keep_prob
-        self.rnn_cell_fw=tf.contrib.rnn.LSTMCell(self.hidden_size)
+        if typeOfRNN=='GRU':
+            self.rnn_cell_fw = tf.contrib.rnn.GRUCell(self.hidden_size)
+            self.rnn_cell_bw = tf.contrib.rnn.GRUCell(self.hidden_size)
+        else
+            self.rnn_cell_fw=tf.contrib.rnn.LSTMCell(self.hidden_size)
+            self.rnn_cell_bw=tf.contrib.rnn.LSTMCell(self.hidden_size)
         self.rnn_cell_fw=tf.contrib.rnn.DropoutWrapper(self.rnn_cell_fw,input_keep_prob=self.keep_prob)
-        self.rnn_cell_bw=tf.contrib.rnn.LSTMCell(self.hidden_size)
         self.rnn_cell_bw=tf.contrib.rnn.DropoutWrapper(self.rnn_cell_bw, input_keep_prob=self.keep_prob)
+        
 
     def build_graph(self,inputs,masks):
         with vs.variable_scope(self.name):
