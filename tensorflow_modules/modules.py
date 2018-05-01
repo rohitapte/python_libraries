@@ -115,13 +115,14 @@ class BiRNNLayer(NeuralLayer):
         self.keep_prob=keep_prob
         if typeOfRNN=='GRU':
             self.rnn_cell_fw = tf.contrib.rnn.GRUCell(self.hidden_size)
+            self.rnn_cell_fw = tf.contrib.rnn.DropoutWrapper(self.rnn_cell_fw, input_keep_prob=self.keep_prob)
             self.rnn_cell_bw = tf.contrib.rnn.GRUCell(self.hidden_size)
+            self.rnn_cell_bw = tf.contrib.rnn.DropoutWrapper(self.rnn_cell_bw, input_keep_prob=self.keep_prob)
         else:
             self.rnn_cell_fw=tf.contrib.rnn.LSTMCell(self.hidden_size)
+            self.rnn_cell_fw = tf.contrib.rnn.DropoutWrapper(self.rnn_cell_fw, input_keep_prob=self.keep_prob)
             self.rnn_cell_bw=tf.contrib.rnn.LSTMCell(self.hidden_size)
-        self.rnn_cell_fw=tf.contrib.rnn.DropoutWrapper(self.rnn_cell_fw,input_keep_prob=self.keep_prob)
-        self.rnn_cell_bw=tf.contrib.rnn.DropoutWrapper(self.rnn_cell_bw, input_keep_prob=self.keep_prob)
-        
+            self.rnn_cell_bw = tf.contrib.rnn.DropoutWrapper(self.rnn_cell_bw, input_keep_prob=self.keep_prob)
 
     def build_graph(self,inputs,masks):
         with vs.variable_scope(self.name):
