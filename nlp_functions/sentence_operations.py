@@ -1,9 +1,9 @@
 from nlp_functions.word_and_character_vectors import PAD_ID,UNK_ID
 import re
 
-def split_by_whitespace(sentence,splitEndOfSentence=True):
+def split_by_whitespace(sentence,splitMidSentenceControl=False):
     words=[]
-    if splitEndOfSentence:
+    if splitMidSentenceControl:
         for word in sentence.strip().split():
             if word[-1] in '.,?!;':
                 words.append(word[:-1])

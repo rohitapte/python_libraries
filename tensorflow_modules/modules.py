@@ -44,9 +44,9 @@ class NeuralNetworkHiddenLayer(NeuralLayer):
         return output
 
 class Convolution2DLayer(NeuralLayer):
-    def __init__(self,name,filter,strides,channel_size,pool_size=None):
+    def __init__(self,name,filter_shape,strides,channel_size,pool_size=None):
         self.name=name
-        self.filter=filter
+        self.filter_shape=filter_shape
         self.strides=strides
         self.channel_size=channel_size
         self.pool_size=pool_size
@@ -54,7 +54,7 @@ class Convolution2DLayer(NeuralLayer):
         #filter[2] must=values[3]
 
     def build_graph(self,values):   #values has shape (batch,X,Y,Z)
-        conv_filter=tf.get_variable(name=self.name+'_conv_filter', shape=self.filter,dtype=tf.float32,initializer=tf.truncated_normal_initializer(stddev=0.05)) #filter is [3,B,Z,channel_size]
+        conv_filter=tf.get_variable(name=self.name+'_conv_filter', shape=self.filter_shape,dtype=tf.float32,initializer=tf.truncated_normal_initializer(stddev=0.05)) #filter is [3,B,Z,channel_size]
         conv=tf.nn.conv2d(values,conv_filter,self.strides,padding='SAME')       #conv has shape (1,X/stride[1],Y/stride[2],channel_size)
         conv_bias=tf.get_variable(name=self.name+'_conv_bias',shape=self.channel_size,dtype=tf.float32,initializer=tf.constant_initializer(0.0))
         conv_bias_add=tf.nn.bias_add(conv,conv_bias)
@@ -66,9 +66,9 @@ class Convolution2DLayer(NeuralLayer):
             return conv_relu
 
 class Convolution1DLayer(NeuralLayer):
-    def __init__(self,name,filter,strides,channel_size,pool_size=None):
+    def __init__(self,name,filter_shape,strides,channel_size,pool_size=None):
         self.name=name
-        self.filter=filter
+        self.filter_shape=filter_shape
         self.strides=strides
         self.channel_size=channel_size
         self.pool_size=pool_size
@@ -76,7 +76,7 @@ class Convolution1DLayer(NeuralLayer):
         # filter[1] must=values[2]
 
     def build_graph(self,values):   #values has shape (batch,X,Y)
-        conv_filter=tf.get_variable(name=self.name + '_conv_filter', shape=self.filter, dtype=tf.float32,initializer=tf.truncated_normal_initializer(stddev=0.05))  # filter is [3,Y,channel_size]
+        conv_filter=tf.get_variable(name=self.name + '_conv_filter', shape=self.filter_shape, dtype=tf.float32,initializer=tf.truncated_normal_initializer(stddev=0.05))  # filter is [3,Y,channel_size]
         conv=tf.nn.conv1d(values,conv_filter,self.strides,padding='SAME')  # conv has shape (1,X/stride,channel_size)
         conv_bias=tf.get_variable(name=self.name+'_conv_bias',shape=self.channel_size,dtype=tf.float32,initializer=tf.constant_initializer(0.0))
         conv_bias_add=tf.nn.bias_add(conv,conv_bias)
